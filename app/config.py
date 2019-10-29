@@ -9,8 +9,7 @@ class BaseConfig(object):
 class TestingConfig(BaseConfig):
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///db.sqlite3'
     print("testingConfig")
-    # SQLALCHEMY_DATABASE_URI = f"postgresql://{os.environ['DBUSER']}:{os.environ['DBPASS']}@{os.environ['DBHOST']}/{os.environ['DBNAME']}"
-    SQLALCHEMY_DATABASE_URI = "https://cosmosdb1029.documents.azure.com:443/"
+    SQLALCHEMY_DATABASE_URI = f"postgresql://{os.environ['DBUSER']}:{os.environ['DBPASS']}@{os.environ['DBHOST']}/{os.environ['DBNAME']}"
     DEBUG = True
     SECRET_KEY = "somekey"  # needed but don't know why
 
