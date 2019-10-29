@@ -1,4 +1,4 @@
-# Flask + React + Postgres Starter 
+# Flask + React + Cosmos 
 
 This is a minimal sample Flask and React starter code that demonstrates how both frameworks can be used together in a single page web Application.
 

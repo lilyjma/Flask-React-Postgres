@@ -17,7 +17,3 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
 
-# $Env:DBHOST = "postgresdb1024.postgres.database.azure.com"
-# $Env:DBUSER = "demo@postgresdb1024"
-# $Env:DBNAME = "team_standup"
-# $Env:DBPASS = "pass@123"
