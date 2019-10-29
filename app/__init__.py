@@ -11,5 +11,13 @@ TEMPLATE_FOLDER = os.path.join(APP_DIR, '../static/build') # Where your index.ht
 app = Flask(__name__, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
 app.config.from_object('app.config.ProductionConfig')
 
+app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.environ['DBUSER']}:{os.environ['DBPASS']}@{os.environ['DBHOST']}/{os.environ['DBNAME']}"
+
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+
+
+# $Env:DBHOST = "postgresdb1024.postgres.database.azure.com"
+# $Env:DBUSER = "demo@postgresdb1024"
+# $Env:DBNAME = "team_standup"
+# $Env:DBPASS = "pass@123"

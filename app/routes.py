@@ -32,6 +32,7 @@ def create_user():
     success = User.create_user(incoming)
 
     if not success:
+        print("routes.py: fail to create user")
         return jsonify(message="User with that email already exists"), 409
 
     new_user = User.query.filter_by(email=incoming["email"]).first()
