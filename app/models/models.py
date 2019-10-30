@@ -24,27 +24,18 @@ class User(db.Model):
 
     @staticmethod
     def create_user(payload):
-        print("models.py: create_user(payload)")
-        print(payload)
         user = User(
             email=payload["email"],
             password=payload["password"],
             first_name=payload["first_name"],
             last_name=payload["last_name"],
         )
-        # print(user.id)
-        # db.session.add(user)
-        # print("models.py: added user")
-        # db.session.commit()
-        # print("models.py: committed")
+
         try:
             db.session.add(user)
-            print("models.py: added user")
             db.session.commit()
-            print("models.py: committed user to db")
             return True
         except IntegrityError:
-            print("models.py: failed to commit user to db")
             return False
 
     @staticmethod
@@ -85,22 +76,16 @@ class Task(db.Model):
 
     @staticmethod
     def add_task(task, user_id, status):
-        print("models.py: add_task()")
         task = Task(task=task, user_id=user_id, status=status)
-        print(task)
         db.session.add(task)
-        print("models.py: added task")
         try:
             db.session.commit()
-            print("models.py: committed addition of task_" + str(task.id))
             return True, task.id
         except IntegrityError:
-            print("models.py: failed to add task--Integrity Error")
             return False, None
 
     @staticmethod
     def get_latest_tasks():
-        print("models.py: get_latest_tasks()")
         user_to_task = {}
 
         result = db.engine.execute(
@@ -108,10 +93,8 @@ class Task(db.Model):
                 from task t 
                 INNER JOIN "user" u 
                     on t.user_id = u.email"""
-        )  # join with users table
+        )  
 
-        print("result from db: ")
-        print(result)
         for t in result:
             if t.user_id in user_to_task:
                 user_to_task.get(t.user_id).append(dict(t))
@@ -122,21 +105,17 @@ class Task(db.Model):
 
     @staticmethod
     def get_tasks_for_user(user_id):
-        print("models.py: get_tasks_for_user()")
         return Task.query.filter_by(user_id=user_id)
 
     @staticmethod
     def delete_task(task_id):
         task_to_delete = Task.query.filter_by(id=task_id).first()
         db.session.delete(task_to_delete)
-        print("models.py: deleted task")
 
         try:
             db.session.commit()
-            print("models.py: committed deletion")
             return True
         except IntegrityError:
-            print("models.py: failed to delete")
             return False
 
     @staticmethod
@@ -145,16 +124,10 @@ class Task(db.Model):
         task_to_edit.task = task
         task_to_edit.status = status
 
-        print("models.py: edit_task ")
-        print("task: " + task + " task_id: " + str(task_id))
-        print("task_to_edit: " + str(task_to_edit))
-
         try:
             db.session.commit()
-            print("models.py: commited edit")
             return True
         except IntegrityError:
-            print("models.py: failed to commit edit")
             return False
 
     @property
