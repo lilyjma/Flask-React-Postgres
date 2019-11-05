@@ -1,19 +1,25 @@
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
+from azure.cosmos import errors, CosmosClient
 
 import os
 
 APP_DIR = os.path.abspath(os.path.dirname(__file__))
-STATIC_FOLDER = os.path.join(APP_DIR, '../static/build/static') # Where your webpack build output folder is
-TEMPLATE_FOLDER = os.path.join(APP_DIR, '../static/build') # Where your index.html file is located
+STATIC_FOLDER = os.path.join(
+    APP_DIR, "../static/build/static"
+)  # Where your webpack build output folder is
+TEMPLATE_FOLDER = os.path.join(
+    APP_DIR, "../static/build"
+)  # Where your index.html file is located
 
 app = Flask(__name__, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
-app.config.from_object('app.config.ProductionConfig')
+app.config.from_object("app.config.ProductionConfig")
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.environ['DBUSER']}:{os.environ['DBPASS']}@{os.environ['DBHOST']}/{os.environ['DBNAME']}"
 
-db = SQLAlchemy(app)
+key = app.config["SECRET_KEY"]
+uri = app.config["COSMOS_DB_URI"]
+
+client = CosmosClient(uri, credential=key)
 bcrypt = Bcrypt(app)
-
 

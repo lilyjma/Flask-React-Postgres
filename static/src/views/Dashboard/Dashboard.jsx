@@ -23,20 +23,20 @@ class Dashboard extends React.Component {
         {!this.props.loaded ? (
           <h1>Loading data...</h1>
         ) : (
-          [
-            (!this.props.data.user_has_tasks ? 
-              <UserCard canEdit={true} email={this.props.userName} name={this.props.data.data.first_name + " " + this.props.data.data.last_name} tasks={[]}/> :
-            <span/> ),
-            this.props.data.users.map(([key, value]) => (
-              <UserCard
-                canEdit={this.props.userName === key}
-                email={key}
-                name={value[0].first_name + " " + value[0].last_name}
-                tasks={value}
-              />
-            ))
-          ]
-        )}
+            [
+              (!this.props.data.user_has_tasks ?
+                <UserCard canEdit={true} email={this.props.userName} name={this.props.data.data.first_name + " " + this.props.data.data.last_name} tasks={[]} /> :
+                <span />),
+              this.props.data.users.map(([key, value]) => (
+                <UserCard
+                  canEdit={this.props.userName === key}
+                  email={key}
+                  name={value[0].first_name + " " + value[0].last_name}
+                  tasks={value}
+                />
+              ))
+            ]
+          )}
       </GridContainer>
     );
   }

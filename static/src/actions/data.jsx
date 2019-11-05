@@ -14,7 +14,7 @@ export function receiveProtectedData(data, users) {
   users = Object.entries(users);
 
   if (user_has_tasks) {
-    users = users.sort(function(x, y) {
+    users = users.sort(function (x, y) {
       if (x[0] === data.email) {
         return -1
       } else if (y[0] === data.email) {
@@ -24,6 +24,7 @@ export function receiveProtectedData(data, users) {
       }
     });
   }
+
 
   return {
     type: RECEIVE_PROTECTED_DATA,
@@ -86,7 +87,7 @@ export function storeTask(token, email, task, updateTaskIdCallback) { //Pass a f
       .catch(error => {
         console.log(error);
       }
-    );
+      );
   };
 }
 

@@ -2,12 +2,8 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
 from app.routes import app
-from app import db
 
-migrate = Migrate(app, db)
 manager = Manager(app)
-
-# migrations
 manager.add_command('db', MigrateCommand)
 
 
