@@ -24,7 +24,6 @@ task_container = db.get_container_client(task_container_name)
 
 class User:
     def __init__(self, first_name, last_name, email, password):
-        # self.id = str(randint(_MIN, _MAX))  # id must be a string for cosmos
         self.id = email
         self.first_name = first_name
         self.last_name = last_name
