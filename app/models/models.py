@@ -60,9 +60,12 @@ class User:
 
     @staticmethod
     def get_user_by_id(user_id):
-        query = "SELECT * FROM users u where u.id=" + user_id
         users = user_container.query_items(
-            query=query, enable_cross_partition_query=True
+            query = "SELECT * FROM users u WHERE u.id = @userId",
+            parameters = [
+                dict(name='@userId', value=user_id)
+            ], 
+            enable_cross_partition_query=True
         )
         user = list(users)[0]
 
@@ -70,9 +73,12 @@ class User:
 
     @staticmethod
     def get_user_by_email(user_email):
-        query = "SELECT * FROM users u where u.email='" + user_email + "'"
         users = user_container.query_items(
-            query=query, enable_cross_partition_query=True
+            query = "SELECT * FROM users u WHERE u.email = @userEmail",
+            parameters=[
+                dict(name='@userEmail', value=user_email)
+            ],       
+            enable_cross_partition_query=True
         )
         user = list(users)[0]
 
@@ -80,17 +86,13 @@ class User:
 
     @staticmethod
     def get_user_with_email_and_password(email, password):
-
-        query = (
-            "SELECT * FROM users u where u.email='"
-            + email
-            + "'"
-            + " and u.password='"
-            + password
-            + "'"
-        )
         users = user_container.query_items(
-            query=query, enable_cross_partition_query=True
+            query="SELECT * FROM users u WHERE u.email = @userEmail AND u.password = @userPassword", 
+            parameters=[
+                dict(name='@userEmail', value=email),
+                dict(name='@userPassword', value=password)
+            ],   
+            enable_cross_partition_query=True
         )
 
         if users:
@@ -134,17 +136,19 @@ class Task:
     def get_latest_tasks():
         user_to_task = {}
 
-        query = "SELECT * FROM users"
         users = user_container.query_items(
-            query=query, enable_cross_partition_query=True
+            query = "SELECT * FROM users", enable_cross_partition_query=True
         )
 
         cnt = 0
         for u in users:
             cnt+=1 
-            task_query = "SELECT * FROM tasks t where t.user_id='" + u["id"] + "'"
             tasks = task_container.query_items(
-                query=task_query, enable_cross_partition_query=True
+                query="SELECT * FROM tasks t WHERE t.user_id = @userId",
+                parameters= [
+                    dict(name='@userId', value=u["id"])
+                ],
+                enable_cross_partition_query=True
             )
             for t in tasks:
                 t["first_name"] = u["first_name"]
@@ -158,18 +162,24 @@ class Task:
 
     @staticmethod
     def get_tasks_for_user(user_id):
-        query = "SELECT * FROM tasks t where t.user_id='" + user_id + "'"
         tasks = task_container.query_items(
-            query=query, enable_cross_partition_query=True
+            query="SELECT * FROM tasks t WHERE t.user_id = @userId", 
+            parameters=[
+                dict(name='@userId', value=user_id)
+            ],
+            enable_cross_partition_query=True
         )
         return tasks
 
     @staticmethod
     def delete_task(task_id):
         try:
-            query = "SELECT * FROM tasks t where t.id='" + task_id + "'"
             tasks = task_container.query_items(
-                query=query, enable_cross_partition_query=True
+                query="SELECT * FROM tasks t WHERE t.id = @taskId",
+                parameters=[
+                    dict(name='@taskId', value=task_id)
+                ],
+                enable_cross_partition_query=True
             )
             task = list(tasks)[0]
             task_container.delete_item(task, partition_key=task_id)
