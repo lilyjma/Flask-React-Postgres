@@ -1,6 +1,8 @@
 import os
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
+from app import APP_DIR
+from dotenv import load_dotenv
 
 
 class BaseConfig(object):
@@ -9,11 +11,14 @@ class BaseConfig(object):
 
 
 class TestingConfig(BaseConfig):
+    dotenv_path = os.path.join(APP_DIR, ".env")
+    load_dotenv(dotenv_path)
+
     # flaskreact app service as service principal
-    AZURE_CLIENT_ID = os.environ["AZURE_CLIENT_ID"]
-    AZURE_TENANT_ID = os.environ["AZURE_TENANT_ID"]
-    AZURE_CLIENT_SECRET = os.environ["AZURE_CLIENT_SECRET"]
-    KEY_VAULT_URL = os.environ["KEY_VAULT_URL"]
+    AZURE_CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
+    AZURE_TENANT_ID = os.getenv("AZURE_TENANT_ID")
+    AZURE_CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET")
+    KEY_VAULT_URL = os.getenv("KEY_VAULT_URL")
 
     credential = DefaultAzureCredential()
     secret_client = SecretClient(vault_url=KEY_VAULT_URL, credential=credential)
