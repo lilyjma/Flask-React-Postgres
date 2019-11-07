@@ -1,25 +1,19 @@
 from datetime import datetime, timedelta
 from sqlalchemy.exc import IntegrityError
-from app import client, bcrypt
+from app import bcrypt
 from random import randint
+from app.utils.db import cosmosDB
 import json, time
-from azure.cosmos import CosmosClient, PartitionKey
 
 
 # for task id
 _MIN = 1
 _MAX = 1000000000
 
-user_container_name = "users"
-task_container_name = "tasks"
-db_name = "team_standup"
-
-
 # get container by walking down resource hierarchy
 # client -> db -> container
-db = client.get_database_client(db_name)
-user_container = db.get_container_client(user_container_name)
-task_container = db.get_container_client(task_container_name)
+user_container = cosmosDB.get_container_client("users")
+task_container = cosmosDB.get_container_client("tasks")
 
 
 class User:
