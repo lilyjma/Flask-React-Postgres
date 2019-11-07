@@ -1,5 +1,5 @@
 from app import app
-from azure.cosmos import CosmosClient
+from azure.cosmos import CosmosClient, exceptions
 
 
 key = app.config["SECRET_KEY"]

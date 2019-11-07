@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
-from sqlalchemy.exc import IntegrityError
 from app import bcrypt
 from random import randint
-from app.utils.db import cosmosDB
+from app.utils.db import cosmosDB, exceptions
 import json, time
 
 
@@ -16,7 +15,7 @@ user_container = cosmosDB.get_container_client("users")
 task_container = cosmosDB.get_container_client("tasks")
 
 
-class User:
+class User():
     def __init__(self, first_name, last_name, email, password):
         self.id = email
         self.first_name = first_name
@@ -33,19 +32,9 @@ class User:
                 email=input["email"],
                 password=input["password"],
             )
-
-            user_container.upsert_item(
-                {
-                    "id": user.id,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "email": user.email,
-                    "password": user.password,
-                }
-            )
-
+            user_container.create_item(user.__dict__)
             return True
-        except IntegrityError:
+        except exceptions.CosmosHttpResponseError:
             return False
 
     @staticmethod
@@ -55,11 +44,9 @@ class User:
     @staticmethod
     def get_user_by_id(user_id):
         users = user_container.query_items(
-            query = "SELECT * FROM users u WHERE u.id = @userId",
-            parameters = [
-                dict(name='@userId', value=user_id)
-            ], 
-            enable_cross_partition_query=True
+            query="SELECT * FROM users u WHERE u.id = @userId",
+            parameters=[dict(name="@userId", value=user_id)],
+            enable_cross_partition_query=True,
         )
         user = list(users)[0]
 
@@ -68,11 +55,9 @@ class User:
     @staticmethod
     def get_user_by_email(user_email):
         users = user_container.query_items(
-            query = "SELECT * FROM users u WHERE u.email = @userEmail",
-            parameters=[
-                dict(name='@userEmail', value=user_email)
-            ],       
-            enable_cross_partition_query=True
+            query="SELECT * FROM users u WHERE u.email = @userEmail",
+            parameters=[dict(name="@userEmail", value=user_email)],
+            enable_cross_partition_query=True,
         )
         user = list(users)[0]
 
@@ -81,12 +66,12 @@ class User:
     @staticmethod
     def get_user_with_email_and_password(email, password):
         users = user_container.query_items(
-            query="SELECT * FROM users u WHERE u.email = @userEmail AND u.password = @userPassword", 
+            query="SELECT * FROM users u WHERE u.email = @userEmail AND u.password = @userPassword",
             parameters=[
-                dict(name='@userEmail', value=email),
-                dict(name='@userPassword', value=password)
-            ],   
-            enable_cross_partition_query=True
+                dict(name="@userEmail", value=email),
+                dict(name="@userPassword", value=password),
+            ],
+            enable_cross_partition_query=True,
         )
 
         if users:
@@ -112,18 +97,9 @@ class Task:
     def add_task(task, user_id, status):
         try:
             task = Task(task=task, user_id=user_id, status=status)
-            task_container.upsert_item(
-                {
-                    "id": task.id,
-                    "date": task.date,
-                    "task": task.task,
-                    "user_id": task.user_id, #user_id is email here
-                    "status": task.status,
-                }
-            )
-
+            task_container.upsert_item(task.__dict__)
             return True, task.id
-        except IntegrityError:
+        except exceptions.CosmosHttpResponseError:
             return False, None
 
     @staticmethod
@@ -131,18 +107,16 @@ class Task:
         user_to_task = {}
 
         users = user_container.query_items(
-            query = "SELECT * FROM users", enable_cross_partition_query=True
+            query="SELECT * FROM users", enable_cross_partition_query=True
         )
 
         cnt = 0
         for u in users:
-            cnt+=1 
+            cnt += 1
             tasks = task_container.query_items(
                 query="SELECT * FROM tasks t WHERE t.user_id = @userId",
-                parameters= [
-                    dict(name='@userId', value=u["id"])
-                ],
-                enable_cross_partition_query=True
+                parameters=[dict(name="@userId", value=u["id"])],
+                enable_cross_partition_query=True,
             )
             for t in tasks:
                 t["first_name"] = u["first_name"]
@@ -157,11 +131,9 @@ class Task:
     @staticmethod
     def get_tasks_for_user(user_id):
         tasks = task_container.query_items(
-            query="SELECT * FROM tasks t WHERE t.user_id = @userId", 
-            parameters=[
-                dict(name='@userId', value=user_id)
-            ],
-            enable_cross_partition_query=True
+            query="SELECT * FROM tasks t WHERE t.user_id = @userId",
+            parameters=[dict(name="@userId", value=user_id)],
+            enable_cross_partition_query=True,
         )
         return tasks
 
@@ -170,16 +142,16 @@ class Task:
         try:
             tasks = task_container.query_items(
                 query="SELECT * FROM tasks t WHERE t.id = @taskId",
-                parameters=[
-                    dict(name='@taskId', value=task_id)
-                ],
-                enable_cross_partition_query=True
+                parameters=[dict(name="@taskId", value=task_id)],
+                enable_cross_partition_query=True,
             )
             task = list(tasks)[0]
             task_container.delete_item(task, partition_key=task_id)
 
             return True
-        except IntegrityError:
+        except exceptions.CosmosHttpResponseError:  # item wasn't deleted successfully
+            return False
+        except exceptions.CosmosResourceNotFoundError:  # item wasn't found
             return False
 
     @staticmethod
@@ -192,7 +164,7 @@ class Task:
             task_container.upsert_item(task_to_edit)
 
             return True
-        except IntegrityError:
+        except exceptions.CosmosHttpResponseError:  # item couldn't be upserted
             return False
 
     @property
