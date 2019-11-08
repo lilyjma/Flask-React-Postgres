@@ -21,7 +21,7 @@ First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) accou
    2. You'll add two secrets called 'cosmosKey' and 'cosmosURI' to Key Vault to hold the cosmos key and URI respectively. To find these, click into the Cosmos DB account created, go to 'Keys' tab and get the Primary Key and the URI. 
 
 ## 2. Getting Access to Key Vault
-To make a long story short, you need a service principal to have access to key vault. The service principal serves as an application ID, which is used during the authorization setup for access to other Azure resources via RBAC (role-based access control). We'll use a Web App instance as our service principal. To do that, we create an App Service Plan, then a Web App instance, then make that our service principal on Cloud Shell (click >_ on the top right hand corner in Portal to open). 
+To make a long story short, you need a service principal to have access to key vault. The service principal serves as an application ID that is used during the authorization setup for access to other Azure resources. We'll use a Web App instance as our service principal. To do that, we create an App Service Plan, then a Web App instance, then make that our service principal. We can do all of this on Cloud Shell (click >_ on the top right hand corner in Portal to open). 
 
 1. Create App Service Plan : 
    
