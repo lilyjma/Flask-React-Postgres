@@ -14,7 +14,7 @@ First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) accou
 
 (Remember to store them in the resource group you created; this will make it easier to clean up the resources in the future.)
 
-1. [Azure Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/create-cosmosdb-resources-portal)
+1. [Azure Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/create-cosmosdb-resources-portal#create-an-azure-cosmos-db-account)
    1. When creating the database, name it 'team_standup'. For this app, you also need two containers named 'tasks' and 'users'. The [partition key](https://docs.microsoft.com/en-us/azure/cosmos-db/partitioning-overview#choose-partitionkey) for both is '/id'. 
 2. [Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/quick-create-portal)
    1. This will store the credentials for the resources this app uses. For example, it'll store the key to the cosmos database. This way, you don't reveal any key in your code. 
