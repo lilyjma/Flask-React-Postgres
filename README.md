@@ -91,12 +91,11 @@ To make a long story short, you need a service principal to have access to key v
    code .
    ```
 
-5. Create a .env file in the root directory
-   1. Put these environment variables and their corresponding value in the file (you saved these in Step 2) : AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID, KEY_VAULT_URI. For example: 
+5. Change the .env.tmp file in the root directory to .env
    
-        ```AZURE_CLIENT_ID="11b855c6-43a5-415b-bd34-042a4509c179"```
-
-    To get KEY_VAULT_URI from Portal, go to the key vault you created, then to the 'Overview' tap, finally look for 'DNS Name' on the top right part of the page.
+   Put in the correct value for each environment variable (you got the values in Step 2) : AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID, KEY_VAULT_URI. 
+   
+    To get KEY_VAULT_URI from Azure Portal, go to the key vault you created, then to the 'Overview' tap, finally look for 'DNS Name' on the top right part of the page.
 
 ## 4. Running The Code Locally
 
@@ -116,7 +115,7 @@ To make a long story short, you need a service principal to have access to key v
    ```
    python manage.py runserver
    ```
-4. Check ```localhost:5000``` in your browser to view the web application.
+3. Check ```localhost:5000``` in your browser to view the web application.
 
 ## 5. Deploying The Code To Azure
 
