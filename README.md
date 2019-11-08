@@ -8,7 +8,7 @@ The code is based on https://github.com/dternyak/React-Redux-Flask and https://g
 ## How to Run
 
 ## 1. Setting up Azure Services
-First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) account if you don't already have one. Sign into portal.azure.com.
+First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) account if you don't already have one. Sign into https://portal.azure.com.
 
 [Create a resource group](https://github.com/lilyjma/azurethings/blob/master/createResourceGroup.md) to store the resources that you'll be using here--Azure Cosmos DB and Key vaults. Then follow the instructions in the links below to create the resources (remember to store them in the resource group you created): 
 
