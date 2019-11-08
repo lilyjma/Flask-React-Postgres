@@ -10,7 +10,7 @@ The code is based on https://github.com/dternyak/React-Redux-Flask and https://g
 ## 1. Setting up Azure Services
 First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) account if you don't already have one. Sign into https://portal.azure.com.
 
-[Create a resource group](https://github.com/lilyjma/azurethings/blob/master/createResourceGroup.md) to store the resources that you'll be using here--Azure Cosmos DB and Key vault. Then follow the instructions in the links below to create each resource:
+[Create a resource group](https://github.com/lilyjma/azurethings/blob/master/createResourceGroup.md) to store the resources that you'll be using here--Azure Cosmos DB and Key vault. Then follow the instructions in the links below to create each resource in Azure Portal:
 
 (Remember to store them in the resource group you created; this will make it easier to clean up the resources in the future.)
 
@@ -21,7 +21,10 @@ First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) accou
    2. You'll add two secrets called 'cosmosKey' and 'cosmosURI' to Key Vault to hold the Cosmos DB key and URI respectively. To find these, click into the database account created, go to 'Keys' tab and get the Primary Key and the URI. 
 
 ## 2. Getting Access to Key Vault
-To make a long story short, you need a service principal to have access to key vault. The service principal serves as an application ID that is used during the authorization setup for access to other Azure resources. We'll use a Web App instance as our service principal. To do that, we create an App Service Plan, then a Web App instance, then make that our service principal. We can do all of this on Cloud Shell (click >_ on the top right hand corner in Portal to open). 
+To make a long story short, you need a service principal to have access to key vault. The service principal serves as an application ID that is used during the authorization setup for access to other Azure resources. We'll use a Web App instance as our service principal. To do that, we create an App Service Plan, then a Web App instance, then make that our service principal. We can do these using Azure CLI on Cloud Shell. 
+
+
+1. Click >_ on the top right hand corner of Azure Portal to open Cloud shell. 
 
 1. Create App Service Plan : 
    
@@ -33,11 +36,13 @@ To make a long story short, you need a service principal to have access to key v
 
     ```az webapp create --name myUniqueAppName --plan myServicePlanName --resource-group myResourceGroup```
 
+    Click on the web app instance you've just created on Azure Portal. In the 'Overview' tab, find 'URL' on the top right portion of the page. This is your app's URL, and it looks something like this : https://myUniqueAppName.azurewebsites.net. Save it to use for the next step.
+
 3. Make the web app a service principal : 
     
     ```az ad sp create-for-rbac --name http://my-applications-url --skip-assignment```
 
-    Use your web app's url. To find that, click on the app in Portal, go to the 'Overview' tab and look for 'URL' on the top right portion of the page. It looks something like https://myUniqueAppName.azurewebsites.net. 
+    After ```--name``` , user your app's url.
 
     After the above comand runs, something like this is returned: 
     ```
@@ -76,17 +81,17 @@ To make a long story short, you need a service principal to have access to key v
    env\scripts\activate
    ```
 
-2. Install requirements.txt
+3. Install requirements.txt
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Import the project folder into VS Code
+4. Import the project folder into VS Code
    ```bash
    code .
    ```
 
-4. Create a .env file in the root directory
+5. Create a .env file in the root directory
    1. Put these environment variables and their corresponding value in the file (you saved these in Step 2) : AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID, KEY_VAULT_URI. For example: 
    
         ```AZURE_CLIENT_ID="11b855c6-43a5-415b-bd34-042a4509c179"```
