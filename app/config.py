@@ -1,9 +1,6 @@
 import os
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
-from app import APP_DIR
-from dotenv import load_dotenv
-
 
 class BaseConfig(object):
     DEBUG = False
@@ -11,9 +8,6 @@ class BaseConfig(object):
 
 
 class TestingConfig(BaseConfig):
-    dotenv_path = os.path.join(APP_DIR, ".env")
-    load_dotenv(dotenv_path)
-
     # flaskreact app service as service principal
     AZURE_CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
     AZURE_TENANT_ID = os.getenv("AZURE_TENANT_ID")
