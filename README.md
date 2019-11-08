@@ -8,9 +8,9 @@ The code is based on https://github.com/dternyak/React-Redux-Flask and https://g
 ## How to Run
 
 ## 1. Setting up Azure Services
-First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) account if you don't already have one. Sign into portal.azure.com.
+First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) account if you don't already have one. Sign into https://portal.azure.com.
 
-[Create a resource group](https://github.com/lilyjma/azurethings/blob/master/createResourceGroup.md) to store the resources that you'll be using here--Azure Cosmos DB and Key vaults. Then follow the instructions in the links below to create the resources (remember to store them in the resource group you created): 
+[Create a resource group](https://github.com/lilyjma/azurethings/blob/master/createResourceGroup.md) to store the resources that you'll be using here--Azure Cosmos DB and Key vault. Then follow the instructions in the links below to create each resource (remember to store them in the resource group you created): 
 
 1. [Azure Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/create-cosmosdb-resources-portal)
    1. When creating the database, name it 'team_standup'. For this app, you also need two containers named 'tasks' and 'users'. The [partition key](https://docs.microsoft.com/en-us/azure/cosmos-db/partitioning-overview#choose-partitionkey) for both is '/id'. 
@@ -33,7 +33,7 @@ To make a long story short, you need a service principal to have access to key v
 
 3. Make the web app a service principal : 
     
-    ```az ad sp create-for-rbac --name http://my-application --skip-assignment```
+    ```az ad sp create-for-rbac --name http://my-applications-url --skip-assignment```
 
     Use your web app's url. To find that, click on the app in Portal, go to the 'Overview' tab and look for 'URL' on the top right portion of the page. It looks something like https://myUniqueAppName.azurewebsites.net. 
 
@@ -48,7 +48,7 @@ To make a long story short, you need a service principal to have access to key v
         }
     ```
 
-    Later you'll set environment variables, you'll need this info. The tenant will be saved as 'AZURE_TENANT_ID', appId as 'AZURE_CLIENT_ID', and password as 'AZURE_CLIENT_SECRET'. 
+    Later when you set environment variables, you'll need this info. The tenant will be saved as 'AZURE_TENANT_ID', appId as 'AZURE_CLIENT_ID', and password as 'AZURE_CLIENT_SECRET'. 
 
     
 
@@ -74,12 +74,6 @@ To make a long story short, you need a service principal to have access to key v
    env\scripts\activate
    ```
 
-   In Powershell
-   ```Powershell
-   py -3 -m venv env
-   env\scripts\activate
-   ```
-
 2. Install requirements.txt
    ```bash
    pip install -r requirements.txt
@@ -91,7 +85,7 @@ To make a long story short, you need a service principal to have access to key v
    ```
 
 4. Create a .env file in the root directory
-   1. Put these environment variables and their corresponding value in (you saved these in Step 2) : AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID, KEY_VAULT_URI. For example: 
+   1. Put these environment variables and their corresponding value in the file (you saved these in Step 2) : AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID, KEY_VAULT_URI. For example: 
    
         ```AZURE_CLIENT_ID="11b855c6-43a5-415b-bd34-042a4509c179"```
 
