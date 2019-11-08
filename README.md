@@ -55,7 +55,7 @@ To make a long story short, you need a service principal to have access to key v
         }
     ```
 
-    Later when you set environment variables, you'll need this info. The tenant will be saved as 'AZURE_TENANT_ID', appId as 'AZURE_CLIENT_ID', and password as 'AZURE_CLIENT_SECRET'. 
+    Later when you set environment variables, you'll need this info. The *tenant* will be saved as 'AZURE_TENANT_ID', *appId* as 'AZURE_CLIENT_ID', and *password* as 'AZURE_CLIENT_SECRET'. 
 
     
 
@@ -86,7 +86,7 @@ To make a long story short, you need a service principal to have access to key v
    pip install -r requirements.txt
    ```
 
-4. Import the project folder into VS Code
+4. Open the project folder in VS Code
    ```bash
    code .
    ```
