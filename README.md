@@ -10,7 +10,9 @@ The code is based on https://github.com/dternyak/React-Redux-Flask and https://g
 ## 1. Setting up Azure Services
 First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) account if you don't already have one. Sign into https://portal.azure.com.
 
-[Create a resource group](https://github.com/lilyjma/azurethings/blob/master/createResourceGroup.md) to store the resources that you'll be using here--Azure Cosmos DB and Key vault. Then follow the instructions in the links below to create each resource (remember to store them in the resource group you created): 
+[Create a resource group](https://github.com/lilyjma/azurethings/blob/master/createResourceGroup.md) to store the resources that you'll be using here--Azure Cosmos DB and Key vault. Then follow the instructions in the links below to create each resource:
+
+(Remember to store them in the resource group you created; this will make it easier to clean up the resources in the future.)
 
 1. [Azure Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/create-cosmosdb-resources-portal)
    1. When creating the database, name it 'team_standup'. For this app, you also need two containers named 'tasks' and 'users'. The [partition key](https://docs.microsoft.com/en-us/azure/cosmos-db/partitioning-overview#choose-partitionkey) for both is '/id'. 
@@ -88,6 +90,8 @@ To make a long story short, you need a service principal to have access to key v
    1. Put these environment variables and their corresponding value in the file (you saved these in Step 2) : AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID, KEY_VAULT_URI. For example: 
    
         ```AZURE_CLIENT_ID="11b855c6-43a5-415b-bd34-042a4509c179"```
+
+    To get KEY_VAULT_URI from Portal, go to the key vault you created, then to the 'Overview' tap, finally look for 'DNS Name' on the top right part of the page.
 
 ## 4. Running The Code Locally
 
