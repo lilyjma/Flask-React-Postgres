@@ -17,8 +17,8 @@ First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) accou
 1. [Azure Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/create-cosmosdb-resources-portal#create-an-azure-cosmos-db-account)
    1. When creating the database, name it 'team_standup'. For this app, you also need two containers named 'tasks' and 'users'. The [partition key](https://docs.microsoft.com/en-us/azure/cosmos-db/partitioning-overview#choose-partitionkey) for both is '/id'. 
 2. [Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/quick-create-portal#create-a-vault)
-   1. This will store the credentials for the resources this app uses. For example, it'll store the key to the cosmos database. This way, you don't reveal any key in your code. 
-   2. You'll add two secrets called 'cosmosKey' and 'cosmosURI' to Key Vault to hold the cosmos key and URI respectively. To find these, click into the Cosmos DB account created, go to 'Keys' tab and get the Primary Key and the URI. 
+   1. This will store the credentials for the resources this app uses. For example, it'll store the key to the Cosmos DB. This way, you don't reveal any key in your code. 
+   2. You'll add two secrets called 'cosmosKey' and 'cosmosURI' to Key Vault to hold the Cosmos DB key and URI respectively. To find these, click into the database account created, go to 'Keys' tab and get the Primary Key and the URI. 
 
 ## 2. Getting Access to Key Vault
 To make a long story short, you need a service principal to have access to key vault. The service principal serves as an application ID that is used during the authorization setup for access to other Azure resources. We'll use a Web App instance as our service principal. To do that, we create an App Service Plan, then a Web App instance, then make that our service principal. We can do all of this on Cloud Shell (click >_ on the top right hand corner in Portal to open). 

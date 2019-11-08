@@ -2,12 +2,7 @@ from datetime import datetime, timedelta
 from app import bcrypt
 from random import randint
 from app.utils.db import cosmosDB, exceptions
-import json, time
-
-
-# for task id
-_MIN = 1
-_MAX = 1000000000
+import json, time, uuid
 
 # get container by walking down resource hierarchy
 # client -> db -> container
@@ -15,7 +10,7 @@ user_container = cosmosDB.get_container_client("users")
 task_container = cosmosDB.get_container_client("tasks")
 
 
-class User():
+class User:
     def __init__(self, first_name, last_name, email, password):
         self.id = email
         self.first_name = first_name
@@ -32,6 +27,7 @@ class User():
                 email=input["email"],
                 password=input["password"],
             )
+
             user_container.create_item(user.__dict__)
             return True
         except exceptions.CosmosHttpResponseError:
@@ -44,8 +40,8 @@ class User():
     @staticmethod
     def get_user_by_id(user_id):
         users = user_container.query_items(
-            query="SELECT * FROM users u WHERE u.id = @userId",
-            parameters=[dict(name="@userId", value=user_id)],
+            query="SELECT * FROM users u WHERE u.id = @id",
+            parameters=[dict(name="@id", value=user_id)],
             enable_cross_partition_query=True,
         )
         user = list(users)[0]
@@ -55,8 +51,8 @@ class User():
     @staticmethod
     def get_user_by_email(user_email):
         users = user_container.query_items(
-            query="SELECT * FROM users u WHERE u.email = @userEmail",
-            parameters=[dict(name="@userEmail", value=user_email)],
+            query="SELECT * FROM users u WHERE u.email = @email",
+            parameters=[dict(name="@email", value=user_email)],
             enable_cross_partition_query=True,
         )
         user = list(users)[0]
@@ -66,10 +62,10 @@ class User():
     @staticmethod
     def get_user_with_email_and_password(email, password):
         users = user_container.query_items(
-            query="SELECT * FROM users u WHERE u.email = @userEmail AND u.password = @userPassword",
+            query="SELECT * FROM users u WHERE u.email = @email AND u.password = @password",
             parameters=[
-                dict(name="@userEmail", value=email),
-                dict(name="@userPassword", value=password),
+                dict(name="@email", value=email),
+                dict(name="@password", value=password),
             ],
             enable_cross_partition_query=True,
         )
@@ -87,7 +83,7 @@ class Task:
         IN_PROGRESS = "IN_PROGRESS"
 
     def __init__(self, task, user_id, status):
-        self.id = str(randint(_MIN, _MAX))
+        self.id = str(uuid.uuid4())
         self.date = str(datetime.utcnow().date())
         self.task = task
         self.user_id = user_id
@@ -114,8 +110,8 @@ class Task:
         for u in users:
             cnt += 1
             tasks = task_container.query_items(
-                query="SELECT * FROM tasks t WHERE t.user_id = @userId",
-                parameters=[dict(name="@userId", value=u["id"])],
+                query="SELECT * FROM tasks t WHERE t.user_id = @id",
+                parameters=[dict(name="@id", value=u["id"])],
                 enable_cross_partition_query=True,
             )
             for t in tasks:
@@ -141,8 +137,8 @@ class Task:
     def delete_task(task_id):
         try:
             tasks = task_container.query_items(
-                query="SELECT * FROM tasks t WHERE t.id = @taskId",
-                parameters=[dict(name="@taskId", value=task_id)],
+                query="SELECT * FROM tasks t WHERE t.id = @id",
+                parameters=[dict(name="@id", value=task_id)],
                 enable_cross_partition_query=True,
             )
             task = list(tasks)[0]
