@@ -20,25 +20,27 @@ First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) accou
    1. This will store the credentials for the resources this app uses. For example, it'll store the key to the Cosmos DB. This way, you don't reveal any key in your code. 
    2. You'll add two secrets called 'cosmosKey' and 'cosmosURI' to Key Vault to hold the Cosmos DB key and URI respectively. To find these, click into the database account created, go to 'Keys' tab and get the Primary Key and the URI. 
 
+You should be able to click into your resource group on the Azure Portal home page and see these two resources.
+
 ## 2. Getting Access to Key Vault
 To make a long story short, you need a service principal to have access to key vault. The service principal serves as an application ID that is used during the authorization setup for access to other Azure resources. We'll use a Web App instance as our service principal. To do that, we create an App Service Plan, then a Web App instance, then make that our service principal. We can do these using Azure CLI on Cloud Shell. 
 
 
 1. Click >_ on the top right hand corner of Azure Portal to open Cloud shell. 
 
-1. Create App Service Plan : 
+2. Create App Service Plan : 
    
     ```az appservice plan create --name myServicePlanName --resource-group myResourceGroup --location westus```
 
     There are locations other than westus. A json object will pop up when the command is done. 
 
-2. Create a Web App instance : (Note that the app name must be unique.)
+3. Create a Web App instance : (Note that the app name must be unique.)
 
     ```az webapp create --name myUniqueAppName --plan myServicePlanName --resource-group myResourceGroup```
 
-    Click on the web app instance you've just created on Azure Portal. In the 'Overview' tab, find 'URL' on the top right portion of the page. This is your app's URL, and it looks something like this : https://myUniqueAppName.azurewebsites.net. Save it to use for the next step.
+    Find the web app instance you've just created on Azure Portal's. In the 'Overview' tab, find 'URL' on the top right portion of the page. This is your app's URL, and it looks something like this : https://myUniqueAppName.azurewebsites.net. Save it to use for the next step.
 
-3. Make the web app a service principal : 
+4. Make the web app a service principal : 
     
     ```az ad sp create-for-rbac --name http://my-applications-url --skip-assignment```
 
@@ -57,6 +59,15 @@ To make a long story short, you need a service principal to have access to key v
 
     Later when you set environment variables, you'll need this info. The *tenant* will be saved as 'AZURE_TENANT_ID', *appId* as 'AZURE_CLIENT_ID', and *password* as 'AZURE_CLIENT_SECRET'. 
 
+5. Authorize the service principal to perform key operations in your key vault:
+
+    ```
+    export AZURE_CLIENT_ID="your-azure-client-id"
+    ```
+
+   ```
+   az keyvault set-policy --name my-key-vault --spn $AZURE_CLIENT_ID --secret-permissions get set list delete backup recover restore purge
+   ```
     
 
 ## 3. Setting Up The Project
@@ -99,7 +110,7 @@ To make a long story short, you need a service principal to have access to key v
 
 ## 4. Running The Code Locally
 
-1. Build the react.js front-end.
+1. Build the react.js front-end
    ```
    npm install
    ```
@@ -111,7 +122,7 @@ To make a long story short, you need a service principal to have access to key v
     
 
 
-2. Start the Flask server
+2. Change back to root directory and start the Flask server
    ```
    python manage.py runserver
    ```
