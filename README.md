@@ -57,7 +57,7 @@ To make a long story short, you need a service principal to have access to Key V
         }
     ```
 
-   Save this info in your favorite editor. In the next step, you'll set *appId* as an environment variable called 'AZURE_CLIENT_ID', and in a later step, you'll also set *tenant* as 'AZURE_TENANT_ID'and *password* as 'AZURE_CLIENT_SECRET'. 
+   Save this info in your favorite editor. In the next step, you'll set *appId* as an environment variable called AZURE_CLIENT_ID, and in a later step, you'll also set *tenant* as AZURE_TENANT_ID and *password* as AZURE_CLIENT_SECRET. 
 
 5. Authorize the service principal to perform operations in your key vault:
 
