@@ -1,6 +1,6 @@
 # Team Standup App  
 
-This is a simple single page web app that integrates the Flask and React framework. It uses Track 2 versions of the [Azure SDK for Python](https://github.com/Azure/azure-sdk-for-python), specifically [azure-cosmos](https://github.com/Azure/azure-sdk-for-python/tree/master/sdk/cosmos/azure-cosmos) and [azure-keyvault-secrets](https://github.com/Azure/azure-sdk-for-python/tree/master/sdk/keyvault/azure-keyvault-secrets), in addition to [azure-identity](https://github.com/Azure/azure-sdk-for-python/tree/master/sdk/identity/azure-identity) for authentication purposes. 
+This is a simple single page web app that integrates the Flask and React framework. It uses Track 2 version of the [Azure SDK for Python](https://github.com/Azure/azure-sdk-for-python), specifically [azure-cosmos](https://github.com/Azure/azure-sdk-for-python/tree/master/sdk/cosmos/azure-cosmos) and [azure-keyvault-secrets](https://github.com/Azure/azure-sdk-for-python/tree/master/sdk/keyvault/azure-keyvault-secrets), in addition to [azure-identity](https://github.com/Azure/azure-sdk-for-python/tree/master/sdk/identity/azure-identity) for authentication purposes. 
 
 
 The code is based on https://github.com/dternyak/React-Redux-Flask and https://github.com/creativetimofficial/material-dashboard-react.
@@ -10,20 +10,20 @@ The code is based on https://github.com/dternyak/React-Redux-Flask and https://g
 ## 1. Setting up Azure Services
 First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) account if you don't already have one. Sign into https://portal.azure.com.
 
-[Create a resource group](https://github.com/lilyjma/azurethings/blob/master/createResourceGroup.md) to store the resources that you'll be using here--Azure Cosmos DB and Key vault. Then follow the instructions in the links below to create each resource in Azure Portal:
+[Create a resource group](https://github.com/lilyjma/azurethings/blob/master/createResourceGroup.md) to store the resources that you'll be using here--Azure Cosmos DB and Key Vault. Then follow instructions in the links below to create each resource in Azure Portal:
 
 (Remember to store them in the resource group you created; this will make it easier to clean up the resources in the future.)
 
 1. [Azure Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/create-cosmosdb-resources-portal#create-an-azure-cosmos-db-account)
-   1. When creating the database, name it 'team_standup'. For this app, you also need two containers named 'tasks' and 'users'. The [partition key](https://docs.microsoft.com/en-us/azure/cosmos-db/partitioning-overview#choose-partitionkey) for both is '/id'. 
+   1. When creating the database, give it an id of 'team_standup'. You also need two containers--give them id 'tasks' and 'users'. The [partition key](https://docs.microsoft.com/en-us/azure/cosmos-db/partitioning-overview#choose-partitionkey) for both is '/id'. 
 2. [Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/quick-create-portal#create-a-vault)
-   1. This will store the credentials for the resources this app uses. For example, it'll store the key to the Cosmos DB. This way, you don't reveal any key in your code. 
-   2. You'll add two secrets called 'cosmosKey' and 'cosmosURI' to Key Vault to hold the Cosmos DB key and URI respectively. To find these, click into the database account created, go to 'Keys' tab and get the Primary Key and the URI. 
+   1. This will store credentials for the resources used by this app. For example, it'll store the key to the Cosmos DB. This way, you don't reveal any key in your code and have a centralized place for all keys the app uses. 
+   2. You'll add two secrets called 'cosmosKey' and 'cosmosURI' to Key Vault to hold the Cosmos DB key and URI respectively. To find these, click into the database account created, go to 'Keys' tab and get the *Primary Key* and *URI*. 
 
 You should be able to click into your resource group on the Azure Portal home page and see these two resources.
 
 ## 2. Getting Access to Key Vault
-To make a long story short, you need a service principal to have access to key vault. The service principal serves as an application ID that is used during the authorization setup for access to other Azure resources. We'll use a Web App instance as our service principal. To do that, we create an App Service Plan, then a Web App instance, then make that our service principal. We can do these using Azure CLI on Cloud Shell. 
+To make a long story short, you need a service principal to have access to Key Vault. The service principal serves as an application ID used during the authorization setup for access to other Azure resources. We'll use a Web App instance as our service principal. To do that, we create an App Service Plan, then a Web App instance, then make that our service principal and give it permission to perform operations to Key Vault. We can do these using Azure CLI on Cloud Shell. 
 
 
 1. Click >_ on the top right hand corner of Azure Portal to open Cloud shell. 
@@ -32,37 +32,37 @@ To make a long story short, you need a service principal to have access to key v
    
     ```az appservice plan create --name myServicePlanName --resource-group myResourceGroup --location westus```
 
-    There are locations other than westus. A json object will pop up when the command is done. 
+    There are locations other than *westus*. A json object will pop up when the command is done. 
 
 3. Create a Web App instance : (Note that the app name must be unique.)
 
     ```az webapp create --name myUniqueAppName --plan myServicePlanName --resource-group myResourceGroup```
 
-    Find the web app instance you've just created on Azure Portal's. In the 'Overview' tab, find 'URL' on the top right portion of the page. This is your app's URL, and it looks something like this : https://myUniqueAppName.azurewebsites.net. Save it to use for the next step.
+    Find the web app instance you've just created on Azure Portal. In the 'Overview' tab, find *URL* on the top right portion of the page. This is your app's URL, and it looks something like this : https://myUniqueAppName.azurewebsites.net. Save it to use for the next step.
 
 4. Make the web app a service principal : 
     
-    ```az ad sp create-for-rbac --name http://my-applications-url --skip-assignment```
+    ```az ad sp create-for-rbac --name https://myUniqueAppName.azurewebsites.net --skip-assignment```
 
-    After ```--name``` , user your app's url.
+    After ```--name``` , use your app's url.
 
-    After the above comand runs, something like this is returned: 
+    When the command finishes running, something like this is returned: 
     ```
         {
-           "appId": "11b855c6-43a5-415b-bd34-042a4509c179",
+           "appId": "my-app-id",
            "displayName": "myUniqueAppName.azurewebsites.net",
            "name": "https://myUniqueAppName.azurewebsites.net",
-           "password": "5ad92c90-9e0b-4bcb-a3ad-a121e9076af1",
-           "tenant": "72f998be-86f2-51ae-01af-2d5cd110db40"
+           "password": "my-password",
+           "tenant": "my-tenant"
         }
     ```
 
-    Later when you set environment variables, you'll need this info. The *tenant* will be saved as 'AZURE_TENANT_ID', *appId* as 'AZURE_CLIENT_ID', and *password* as 'AZURE_CLIENT_SECRET'. 
+   Save this info in your favorite editor. In the next step, you'll set *appId* as an environment variable called 'AZURE_CLIENT_ID', and in a later step, you'll also set *tenant* as 'AZURE_TENANT_ID'and *password* as 'AZURE_CLIENT_SECRET'. 
 
-5. Authorize the service principal to perform key operations in your key vault:
+5. Authorize the service principal to perform operations in your key vault:
 
     ```
-    export AZURE_CLIENT_ID="your-azure-client-id"
+    export AZURE_CLIENT_ID="my-azure-client-id"
     ```
 
    ```
@@ -106,7 +106,7 @@ To make a long story short, you need a service principal to have access to key v
    
    Put in the correct value for each environment variable (you got the values in Step 2) : AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID, KEY_VAULT_URI. 
    
-    To get KEY_VAULT_URI from Azure Portal, go to the key vault you created, then to the 'Overview' tap, finally look for 'DNS Name' on the top right part of the page.
+    To get KEY_VAULT_URI from Azure Portal, go to the key vault you created, then to the 'Overview' tap and look for *DNS Name* on the top right portion of the page.
 
 ## 4. Running The Code Locally
 
