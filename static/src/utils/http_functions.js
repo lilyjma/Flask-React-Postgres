@@ -40,14 +40,14 @@ export function store_task(token, user_id, task, status) {
     user_id,
     status
   },
-  tokenConfig(token));
+    tokenConfig(token));
 }
 
 export function delete_task(token, task_id) {
   return axios.post("/api/delete_task", {
     task_id
   },
-  tokenConfig(token));
+    tokenConfig(token));
 }
 
 export function edit_task(token, task_id, task, status) {
@@ -56,5 +56,5 @@ export function edit_task(token, task_id, task, status) {
     task,
     status
   },
-  tokenConfig(token));
+    tokenConfig(token));
 }

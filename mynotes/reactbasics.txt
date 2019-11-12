@@ -1,0 +1,47 @@
+//props
+
+class App extends Component{
+
+    state = {
+        todos: [
+            {
+                id: 1,
+                title: 'to do 1'
+            },
+            {
+                id: 2,
+                title: 'to do 2'
+            }
+        ]
+    }
+
+    render(){
+        console.log(this.state.todos)
+        return(
+            <div className='App'> 
+                <Todos todos={this.state.todos} > //code goes into {} 
+            </div>
+        )
+    }
+    
+}
+
+
+import PropTypes from 'prop-types';
+//now here in the todos class, can access the state passed through 'this.props'
+class Todos extends Component{
+    render(){ //only required life cycle method
+        console.log(this.props.todos)
+        return(
+            return this.props.todos.map((todo) =>(
+                <TodoItem key={todo.id} todo={todo} /> //bc iteration, there's a list of <TodoItem>, list needs each item to have unique key 
+            ))
+        )
+    }
+}
+
+//PropTypes: array, object
+Todos.propTypes = { //'Todos' should match the name of class
+    todos: PropTypes.array.isRequired
+}
+

@@ -1,5 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
+
+
 import history from "./history/history";
 import { Route, Router, Switch } from "react-router-dom";
 import configureStore from "./store/configureStore";

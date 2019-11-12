@@ -1,36 +1,36 @@
 from datetime import datetime, timedelta
-from sqlalchemy.exc import IntegrityError
-from app import db, bcrypt
+from app import bcrypt
+from random import randint
+from app.utils.db import cosmosDB, exceptions
+import json, time, uuid
+
+# get container by walking down resource hierarchy
+# client -> db -> container
+user_container = cosmosDB.get_container_client("users")
+task_container = cosmosDB.get_container_client("tasks")
 
 
-class User(db.Model):
-    id = db.Column(db.Integer(), primary_key=True)
-    email = db.Column(db.String(255), unique=True)
-    password = db.Column(db.String(255))
-    first_name = db.Column(db.String(255))
-    last_name = db.Column(db.String(255))
-    
-
+class User:
     def __init__(self, first_name, last_name, email, password):
+        self.id = email
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
-        self.password = User.hashed_password(password)
-    
-    @staticmethod
-    def create_user(payload):
-        user = User(
-            email=payload["email"],
-            password=payload["password"],
-            first_name=payload["first_name"],
-            last_name=payload["last_name"],
-        )
+        self.password = password
 
+    @staticmethod
+    def create_user(input):
         try:
-            db.session.add(user)
-            db.session.commit()
+            user = User(
+                first_name=input["first_name"],
+                last_name=input["last_name"],
+                email=input["email"],
+                password=input["password"],
+            )
+
+            user_container.create_item(user.__dict__)
             return True
-        except IntegrityError:
+        except exceptions.CosmosHttpResponseError:
             return False
 
     @staticmethod
@@ -39,102 +39,137 @@ class User(db.Model):
 
     @staticmethod
     def get_user_by_id(user_id):
-        user = User.query.filter_by(id=user_id).first()
+        users = user_container.query_items(
+            query="SELECT * FROM users u WHERE u.id = @id",
+            parameters=[dict(name="@id", value=user_id)],
+            enable_cross_partition_query=True,
+        )
+        user = list(users)[0]
+
+        return user
+
+    @staticmethod
+    def get_user_by_email(user_email):
+        users = user_container.query_items(
+            query="SELECT * FROM users u WHERE u.email = @email",
+            parameters=[dict(name="@email", value=user_email)],
+            enable_cross_partition_query=True,
+        )
+        user = list(users)[0]
+
         return user
 
     @staticmethod
     def get_user_with_email_and_password(email, password):
-        user = User.query.filter_by(email=email).first()
-        if user and bcrypt.check_password_hash(user.password, password):
-            return user
+        users = user_container.query_items(
+            query="SELECT * FROM users u WHERE u.email = @email AND u.password = @password",
+            parameters=[
+                dict(name="@email", value=email),
+                dict(name="@password", value=password),
+            ],
+            enable_cross_partition_query=True,
+        )
+
+        if users:
+            user = list(users)
+            return user[0]
         else:
             return None
 
 
-class Task(db.Model):
+class Task:
     class STATUS:
-        COMPLETED = 'COMPLETED'
-        IN_PROGRESS = 'IN_PROGRESS'
+        COMPLETED = "COMPLETED"
+        IN_PROGRESS = "IN_PROGRESS"
 
-    id = db.Column(db.Integer(), primary_key=True)
-    date = db.Column(db.DateTime())
-    task = db.Column(db.String(255))
-    user_id = db.Column(db.String(255))
-    status = db.Column(db.String(255))
-    
     def __init__(self, task, user_id, status):
-        self.date = datetime.utcnow().date()
+        self.id = str(uuid.uuid4())
+        self.date = str(datetime.utcnow().date())
         self.task = task
         self.user_id = user_id
         self.status = status
 
     @staticmethod
     def add_task(task, user_id, status):
-        task = Task(
-            task=task,
-            user_id=user_id,
-            status=status
-        )
-        
-        db.session.add(task)
         try:
-            db.session.commit()
+            task = Task(task=task, user_id=user_id, status=status)
+            task_container.upsert_item(task.__dict__)
             return True, task.id
-        except IntegrityError:
+        except exceptions.CosmosHttpResponseError:
             return False, None
-    
+
     @staticmethod
     def get_latest_tasks():
         user_to_task = {}
 
-        result = db.engine.execute(
-            """SELECT t.id, t.date, t.task, t.user_id, t.status, u.first_name, u.last_name
-                from task t 
-                INNER JOIN "user" u 
-                    on t.user_id = u.email""") # join with users table
-                    
-        for t in result:
-            if t.user_id in user_to_task:
-                user_to_task.get(t.user_id).append(dict(t))
-            else:
-                user_to_task[t.user_id] = [dict(t)]
+        users = user_container.query_items(
+            query="SELECT * FROM users", enable_cross_partition_query=True
+        )
+
+        cnt = 0
+        for u in users:
+            cnt += 1
+            tasks = task_container.query_items(
+                query="SELECT * FROM tasks t WHERE t.user_id = @id",
+                parameters=[dict(name="@id", value=u["id"])],
+                enable_cross_partition_query=True,
+            )
+            for t in tasks:
+                t["first_name"] = u["first_name"]
+                t["last_name"] = u["last_name"]
+                if t["user_id"] in user_to_task:
+                    user_to_task.get(t["user_id"]).append(t)
+                else:
+                    user_to_task[t["user_id"]] = [t]
 
         return user_to_task
 
     @staticmethod
     def get_tasks_for_user(user_id):
-        return Task.query.filter_by(user_id=user_id)
+        tasks = task_container.query_items(
+            query="SELECT * FROM tasks t WHERE t.user_id = @userId",
+            parameters=[dict(name="@userId", value=user_id)],
+            enable_cross_partition_query=True,
+        )
+        return tasks
 
     @staticmethod
     def delete_task(task_id):
-        task_to_delete = Task.query.filter_by(id=task_id).first()
-        db.session.delete(task_to_delete)
-
         try:
-            db.session.commit()
+            tasks = task_container.query_items(
+                query="SELECT * FROM tasks t WHERE t.id = @id",
+                parameters=[dict(name="@id", value=task_id)],
+                enable_cross_partition_query=True,
+            )
+            task = list(tasks)[0]
+            task_container.delete_item(task, partition_key=task_id)
+
             return True
-        except IntegrityError:
+        except exceptions.CosmosHttpResponseError:  # item wasn't deleted successfully
             return False
-    
+        except exceptions.CosmosResourceNotFoundError:  # item wasn't found
+            return False
+
     @staticmethod
     def edit_task(task_id, task, status):
-        task_to_edit = Task.query.filter_by(id=task_id).first()
-        task_to_edit.task = task
-        task_to_edit.status = status
-
         try:
-            db.session.commit()
+            task_to_edit = task_container.read_item(task_id, partition_key=task_id)
+            task_to_edit["task"] = task
+            task_to_edit["status"] = status
+
+            task_container.upsert_item(task_to_edit)
+
             return True
-        except IntegrityError:
+        except exceptions.CosmosHttpResponseError:  # item couldn't be upserted
             return False
 
     @property
     def serialize(self):
-       """Return object data in easily serializeable format"""
-       return {
-           'id'         : self.id,
-           'date'       : self.date.strftime("%Y-%m-%d"),
-           'task'       : self.task,
-           'user_id'    : self.user_id,
-           'status'     : self.status,
-       }
+        """Return object data in easily serializeable format"""
+        return {
+            "id": self.id,
+            "date": self.date.strftime("%Y-%m-%d"),
+            "task": self.task,
+            "user_id": self.user_id,
+            "status": self.status,
+        }
