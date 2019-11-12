@@ -23,46 +23,34 @@ First, sign up for a free [Azure](https://azure.microsoft.com/en-us/free/) accou
 You should be able to click into your resource group on the Azure Portal home page and see these two resources.
 
 ## 2. Getting Access to Key Vault
-To make a long story short, you need a service principal to have access to Key Vault. The service principal serves as an application ID used during the authorization setup for access to other Azure resources. We'll use a Web App instance as our service principal. To do that, we create an App Service Plan, then a Web App instance, then make that our service principal and give it permission to perform operations to Key Vault. We can do these using Azure CLI on Cloud Shell. 
+One way to access Key Vault is through a service principal. The service principal serves as an application ID used during the authorization setup for access to Azure resources. After making our service principal, we give it permission to perform operations to Key Vault. We can do these using Azure CLI on Cloud Shell. 
 
 
 1. Click >_ on the top right hand corner of Azure Portal to open Cloud shell. 
 
-2. Create App Service Plan : 
-   
-    ```az appservice plan create --name myServicePlanName --resource-group myResourceGroup --location westus```
-
-    There are locations other than *westus*. A json object will pop up when the command is done. 
-
-3. Create a Web App instance : (Note that the app name must be unique.)
-
-    ```az webapp create --name myUniqueAppName --plan myServicePlanName --resource-group myResourceGroup```
-
-    Find the web app instance you've just created on Azure Portal. In the 'Overview' tab, find *URL* on the top right portion of the page. This is your app's URL, and it looks something like this : https://myUniqueAppName.azurewebsites.net. Save it to use for the next step.
-
-4. Make the web app a service principal : 
+2. Create a service principal : 
     
-    ```az ad sp create-for-rbac --name https://myUniqueAppName.azurewebsites.net --skip-assignment```
+    ```az ad sp create-for-rbac --name http://my-application --skip-assignment```
 
-    After ```--name``` , use your app's url.
+    Replace 'http://my-application' with a name of your choice. Just make sure that it starts with 'http://', otherwise, you'll get a warning saying that the name you gave is changed to a valid URI, the required format used for service principal names.
 
     When the command finishes running, something like this is returned: 
     ```
         {
-           "appId": "my-app-id",
-           "displayName": "myUniqueAppName.azurewebsites.net",
-           "name": "https://myUniqueAppName.azurewebsites.net",
-           "password": "my-password",
-           "tenant": "my-tenant"
+           "appId": "generated app id",
+           "displayName": "my-application",
+           "name": "http://my-application",
+           "password": "random password",
+           "tenant": "tenant id"
         }
     ```
 
-   Save this info in your favorite editor. In the next step, you'll set *appId* as an environment variable called AZURE_CLIENT_ID, and in a later step, you'll also set *tenant* as AZURE_TENANT_ID and *password* as AZURE_CLIENT_SECRET. 
+   Save this info somewhere. In the next step, you'll set *appId* as an environment variable called AZURE_CLIENT_ID, and in a later step, you'll also set *tenant* as AZURE_TENANT_ID and *password* as AZURE_CLIENT_SECRET. 
 
-5. Authorize the service principal to perform operations in your key vault:
+3. Authorize the service principal to perform operations in your Key Vault:
 
     ```
-    export AZURE_CLIENT_ID="my-azure-client-id"
+    export AZURE_CLIENT_ID="generated app id"
     ```
 
    ```
@@ -119,8 +107,6 @@ To make a long story short, you need a service principal to have access to Key V
     ```
     npm run build
     ```
-    
-
 
 2. Change back to root directory and start the Flask server
    ```
